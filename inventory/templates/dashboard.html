@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Inventory Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">📦 Smart Inventory Dashboard</h2>
+
+    <!-- Add Product -->
+    <div class="card p-3 mb-4">
+        <h4>Add Product</h4>
+        <input id="name" class="form-control mb-2" placeholder="Product Name">
+        <input id="category" class="form-control mb-2" placeholder="Category">
+        <input id="quantity" type="number" class="form-control mb-2" placeholder="Quantity">
+        <input id="price" type="number" class="form-control mb-2" placeholder="Price">
+        <input id="reorder" type="number" class="form-control mb-2" placeholder="Reorder Level">
+        <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="card p-3 mb-4">
+        <h4>Inventory</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="card p-3">
+        <h4>⚠ Low Stock</h4>
+        <ul id="lowStockList"></ul>
+    </div>
+
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>
