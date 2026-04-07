@@ -1,51 +1,223 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Smart Inventory Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+<body class="app-bg text-slate-100 min-h-screen" data-page="dashboard" data-can-manage-inventory="{{ can_manage_inventory|yesno:'true,false' }}" data-can-manage-employees="{{ can_manage_employees|yesno:'true,false' }}" data-is-owner="{{ is_company_owner|yesno:'true,false' }}">
+    <div class="layout">
+        <aside class="sidebar glass-card">
+            <div>
+                <p class="eyebrow">{{ company.name|default:'Inventory OS' }}</p>
+                <h1 class="brand-mark mt-2 mb-8">StockFlow AI</h1>
+            </div>
+            <nav class="space-y-2">
+                <a href="{% url 'dashboard' %}" class="nav-item nav-item-active">Dashboard</a>
+                <a href="{% url 'inventory-page' %}" class="nav-item">Inventory</a>
+                <a href="{% url 'suppliers-page' %}" class="nav-item">Suppliers</a>
+                <a href="{% url 'transactions-page' %}" class="nav-item">Transactions</a>
+                {% if can_manage_employees %}
+                    <a href="{% url 'employees-page' %}" class="nav-item">Employees</a>
+                {% endif %}
+                {% if is_company_owner %}
+                    <a href="{% url 'settings-page' %}" class="nav-item">Settings</a>
+                {% endif %}
+            </nav>
+            <div class="sidebar-panel mt-auto">
+                <p class="text-sm text-slate-300">Track stock, supplier health, and movement from one place.</p>
+                <a href="{% url 'logout' %}" class="btn-danger mt-4">Logout</a>
+            </div>
+        </aside>
 
-<body class="bg-light">
+        <main class="content space-y-6">
+            <header class="hero-card animate-fade-in">
+                <div class="hero-copy">
+                    <p class="eyebrow">Control room</p>
+                    <h2>Command center for {{ company.name|default:'your company' }}.</h2>
+                    <p class="hero-text">Review inventory health, employee activity, low stock risk, and company-wide movement from one tenant-safe workspace.</p>
+                    <div class="hero-actions">
+                        {% if can_manage_inventory %}<button id="productComposerToggle" type="button" class="btn-primary">Add New Product</button>{% endif %}
+                        <a href="{% url 'inventory-page' %}" class="btn-secondary">Open Inventory Workspace</a>
+                        <a href="{% url 'transactions-page' %}" class="btn-secondary">Record Stock Movement</a>
+                    </div>
+                </div>
+                <div class="hero-panel">
+                    <p class="text-sm text-slate-300">Signed in as</p>
+                    <h3 class="text-2xl font-bold">{{ request.user.username }}</h3>
+                    <div class="hero-mini-stats">
+                        <div>
+                            <span>Total units</span>
+                            <strong id="totalUnits">0</strong>
+                        </div>
+                        <div>
+                            <span>Inventory value</span>
+                            <strong id="inventoryValue">Rs. 0</strong>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-<div class="container mt-4">
+            <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 animate-slide-up">
+                <div class="metric-card">
+                    <p>Total Products</p>
+                    <h3 id="totalProducts">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>Low Stock Items</p>
+                    <h3 id="lowStockItems">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>Total Transactions</p>
+                    <h3 id="totalTransactions">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>Total Employees</p>
+                    <h3 id="totalEmployees">0</h3>
+                </div>
+            </section>
 
-    <h2 class="mb-4">📦 Smart Inventory Dashboard</h2>
+            <section id="productComposer" class="glass-card p-5 composer-panel hidden {% if not can_manage_inventory %}hidden{% endif %}">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">New stock</p>
+                        <h3 id="productComposerTitle" class="font-semibold text-2xl">Add Product</h3>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetProductForm()">Close</button>
+                </div>
+                <form id="productForm" class="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
+                    <input type="hidden" id="productId">
+                    <input id="productName" class="input" placeholder="Product name" required>
+                    <input id="productSku" class="input" placeholder="SKU code" required>
+                    <input id="productCategory" class="input" placeholder="Category" required>
+                    <input id="productQuantity" class="input" type="number" min="0" placeholder="Opening quantity" required>
+                    <input id="productPrice" class="input" type="number" min="0" step="0.01" placeholder="Unit price" required>
+                    <input id="productReorder" class="input" type="number" min="0" placeholder="Reorder level" required>
+                    <select id="productLocation" class="input"></select>
+                    <select id="productSupplier" class="input"></select>
+                    <div class="flex gap-3 xl:col-span-4">
+                        <button type="submit" class="btn-primary">Save Product</button>
+                        <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetProductForm()">Reset</button>
+                    </div>
+                </form>
+            </section>
 
-    <!-- Add Product -->
-    <div class="card p-3 mb-4">
-        <h4>Add Product</h4>
-        <input id="name" class="form-control mb-2" placeholder="Product Name">
-        <input id="category" class="form-control mb-2" placeholder="Category">
-        <input id="quantity" type="number" class="form-control mb-2" placeholder="Quantity">
-        <input id="price" type="number" class="form-control mb-2" placeholder="Price">
-        <input id="reorder" type="number" class="form-control mb-2" placeholder="Reorder Level">
-        <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Live stock</p>
+                        <h3 class="font-semibold text-2xl">Available Inventory</h3>
+                    </div>
+                    <div class="toolbar-wrap">
+                        <input id="productSearch" class="input toolbar-input" placeholder="Search by name, category, or SKU">
+                        <select id="productStockFilter" class="input toolbar-select">
+                            <option value="all">All stock</option>
+                            <option value="low">Low stock only</option>
+                        </select>
+                        <button class="btn-secondary" onclick="window.InventoryApp.loadProducts(1)">Refresh</button>
+                        <a href="{% url 'export-products' %}" class="btn-secondary">Export CSV</a>
+                    </div>
+                </div>
+                <div class="inventory-summary-bar mb-4">
+                    <span id="inventoryResultsMeta">Showing your latest stock positions.</span>
+                    <div class="summary-chips">
+                        <span class="summary-chip">Fast search</span>
+                        <span class="summary-chip">Low-stock focus</span>
+                        <span class="summary-chip">Inline editing</span>
+                    </div>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-sm inventory-table">
+                        <thead>
+                            <tr class="text-slate-300 border-b border-slate-700">
+                                <th class="text-left py-2">Product</th>
+                                <th class="text-left py-2">SKU</th>
+                                <th class="text-left py-2">Category</th>
+                                <th class="text-left py-2">Available</th>
+                                <th class="text-left py-2">Supplier</th>
+                                <th class="text-left py-2">Status</th>
+                                <th class="text-left py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable"></tbody>
+                    </table>
+                </div>
+                <div id="productsPagination" class="mt-4 flex gap-2"></div>
+            </section>
+
+            <section class="grid xl:grid-cols-3 gap-6">
+                <div class="glass-card p-5 xl:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Category Distribution</h3>
+                        <span class="section-caption">What your stock mix looks like right now</span>
+                    </div>
+                    <canvas id="categoryChart" height="100"></canvas>
+                </div>
+
+                <div class="glass-card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Low Stock Alerts</h3>
+                        <span class="text-xs text-red-300">Action Required</span>
+                    </div>
+                    <ul id="lowStockList" class="space-y-2 text-sm"></ul>
+                </div>
+            </section>
+
+            <section class="grid xl:grid-cols-2 gap-6">
+                <div class="glass-card p-5">
+                    <div class="section-heading mb-4">
+                        <div>
+                            <p class="eyebrow">Audit log</p>
+                            <h3 class="font-semibold text-xl">Recent Activity</h3>
+                        </div>
+                    </div>
+                    <ul id="recentActivityList" class="space-y-3 text-sm"></ul>
+                </div>
+
+                <div class="glass-card p-5">
+                    <div class="section-heading mb-4">
+                        <div>
+                            <p class="eyebrow">Notifications</p>
+                            <h3 class="font-semibold text-xl">Unread Alerts</h3>
+                        </div>
+                    </div>
+                    <ul id="notificationList" class="space-y-3 text-sm"></ul>
+                </div>
+            </section>
+
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Operations feed</p>
+                        <h3 class="font-semibold text-2xl">Recent Transactions</h3>
+                    </div>
+                    <a href="{% url 'export-transactions' %}" class="btn-secondary">Export Transactions CSV</a>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-slate-300 border-b border-slate-700">
+                                <th class="text-left py-2">Product</th>
+                                <th class="text-left py-2">Type</th>
+                                <th class="text-left py-2">Quantity</th>
+                                <th class="text-left py-2">By</th>
+                                <th class="text-left py-2">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactionsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- Inventory Table -->
-    <div class="card p-3 mb-4">
-        <h4>Inventory</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryTable"></tbody>
-        </table>
-    </div>
-
-    <!-- Low Stock -->
-    <div class="card p-3">
-        <h4>⚠ Low Stock</h4>
-        <ul id="lowStockList"></ul>
-    </div>
-
-</div>
-
-<script src="/static/script.js"></script>
-
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        window.InventoryApp.initDashboard();
+    </script>
 </body>
 </html>

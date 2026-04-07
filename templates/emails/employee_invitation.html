@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} Invitation</title>
+</head>
+<body style="margin:0;padding:0;background:#08111e;font-family:Segoe UI,Arial,sans-serif;color:#e2e8f0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#08111e;padding:24px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#0f1b2d;border:1px solid #20344f;border-radius:24px;overflow:hidden;">
+                    <tr>
+                        <td style="padding:32px;background:linear-gradient(135deg,#16a34a,#0ea5e9);color:#f8fafc;">
+                            <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.9;">Team Access</div>
+                            <h1 style="margin:10px 0 0;font-size:30px;line-height:1.1;">You were invited to {{ company_name }}</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:32px;">
+                            <p style="margin:0 0 16px;font-size:16px;color:#cbd5e1;">Hello {{ full_name }}, your account is ready in {{ app_name }}.</p>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;border-collapse:separate;border-spacing:0 12px;">
+                                <tr>
+                                    <td style="padding:16px 18px;background:#08111e;border:1px solid #244668;border-radius:16px;">
+                                        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.2em;color:#7dd3fc;margin-bottom:6px;">Username</div>
+                                        <div style="font-size:20px;font-weight:700;color:#f8fafc;">{{ username }}</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:16px 18px;background:#08111e;border:1px solid #244668;border-radius:16px;">
+                                        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.2em;color:#7dd3fc;margin-bottom:6px;">Temporary Password</div>
+                                        <div style="font-size:20px;font-weight:700;color:#f8fafc;">{{ temporary_password }}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin:0 0 14px;font-size:15px;color:#cbd5e1;">Sign in and change your password immediately on first login.</p>
+                            <p style="margin:0;font-size:14px;color:#94a3b8;">Keep this email secure until you finish onboarding.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:20px 32px;border-top:1px solid #20344f;font-size:13px;color:#94a3b8;">
+                            {{ app_name }} · Company-scoped inventory management
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

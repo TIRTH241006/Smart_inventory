@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} Low Stock Alert</title>
+</head>
+<body style="margin:0;padding:0;background:#08111e;font-family:Segoe UI,Arial,sans-serif;color:#e2e8f0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#08111e;padding:24px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#0f1b2d;border:1px solid #20344f;border-radius:24px;overflow:hidden;">
+                    <tr>
+                        <td style="padding:32px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff7ed;">
+                            <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.95;">Alert</div>
+                            <h1 style="margin:10px 0 0;font-size:30px;line-height:1.1;">{{ product_name }} is low on stock</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:32px;">
+                            <p style="margin:0 0 16px;font-size:16px;color:#cbd5e1;">{{ company_name }} needs attention on a product that has dropped below its reorder threshold.</p>
+                            <div style="margin:24px 0;padding:20px;border-radius:18px;background:#08111e;border:1px solid #5b3a12;">
+                                <div style="font-size:13px;color:#fbbf24;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:12px;">Current Stock</div>
+                                <div style="font-size:28px;font-weight:800;color:#f8fafc;">{{ quantity }} units</div>
+                                <div style="margin-top:8px;font-size:14px;color:#cbd5e1;">Reorder level: {{ reorder_level }} units</div>
+                            </div>
+                            <p style="margin:0;font-size:14px;color:#94a3b8;">Review the inventory dashboard and replenish stock before fulfillment is impacted.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:20px 32px;border-top:1px solid #20344f;font-size:13px;color:#94a3b8;">
+                            {{ app_name }} · Inventory health monitoring
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

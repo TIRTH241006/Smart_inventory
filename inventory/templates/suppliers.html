@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suppliers | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="app-bg text-slate-100 min-h-screen" data-page="suppliers" data-can-manage-inventory="{{ can_manage_inventory|yesno:'true,false' }}" data-can-manage-employees="{{ can_manage_employees|yesno:'true,false' }}" data-is-owner="{{ is_company_owner|yesno:'true,false' }}">
+    <div class="layout">
+        <aside class="sidebar glass-card">
+            <div>
+                <p class="eyebrow">{{ company.name|default:'Supplier OS' }}</p>
+                <h1 class="brand-mark mt-2 mb-8">StockFlow AI</h1>
+            </div>
+            <nav class="space-y-2">
+                <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'inventory-page' %}" class="nav-item">Inventory</a>
+                <a href="{% url 'suppliers-page' %}" class="nav-item nav-item-active">Suppliers</a>
+                <a href="{% url 'transactions-page' %}" class="nav-item">Transactions</a>
+                {% if can_manage_employees %}<a href="{% url 'employees-page' %}" class="nav-item">Employees</a>{% endif %}
+                {% if is_company_owner %}<a href="{% url 'settings-page' %}" class="nav-item">Settings</a>{% endif %}
+            </nav>
+            <div class="sidebar-panel mt-auto">
+                <p class="text-sm text-slate-300">Manage supplier contacts, track coverage, and keep procurement details organized without losing context.</p>
+                <a href="{% url 'logout' %}" class="btn-danger mt-4">Logout</a>
+            </div>
+        </aside>
+
+        <main class="content space-y-5">
+            <section class="glass-card p-5">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Partner network</p>
+                        <h2 class="text-2xl font-semibold">Supplier Directory</h2>
+                    </div>
+                    <div class="hero-actions">
+                        {% if is_company_owner %}<button id="supplierComposerToggle" type="button" class="btn-primary">Add Supplier</button>{% endif %}
+                        <a href="{% url 'inventory-page' %}" class="btn-secondary">Open Inventory</a>
+                    </div>
+                </div>
+                <p class="text-slate-300 mt-3">Review suppliers first, then open the composer only when you want to add or update one.</p>
+            </section>
+
+            <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div class="metric-card">
+                    <p>Total Suppliers</p>
+                    <h3 id="totalSuppliers">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>With Email</p>
+                    <h3 id="suppliersWithEmail">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>With Phone</p>
+                    <h3 id="suppliersWithPhone">0</h3>
+                </div>
+                <div class="metric-card">
+                    <p>Named Contacts</p>
+                    <h3 id="suppliersWithContact">0</h3>
+                </div>
+            </section>
+
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Supplier list</p>
+                        <h3 class="font-semibold text-xl">Active Suppliers</h3>
+                    </div>
+                    <div class="toolbar-wrap">
+                        <input id="supplierSearch" class="input toolbar-input" placeholder="Search supplier, contact, email, phone">
+                        <button class="btn-secondary" onclick="window.InventoryApp.loadSuppliers()">Search</button>
+                    </div>
+                </div>
+                <div class="inventory-summary-bar mb-4">
+                    <span id="suppliersResultsMeta">Keep your supplier directory complete and easy to search.</span>
+                    <div class="summary-chips">
+                        <span class="summary-chip">Searchable</span>
+                        <span class="summary-chip">Contact health</span>
+                        <span class="summary-chip">Quick edit</span>
+                    </div>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-sm inventory-table">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-300">
+                                <th class="py-2 text-left">Supplier</th>
+                                <th class="py-2 text-left">Contact Person</th>
+                                <th class="py-2 text-left">Email</th>
+                                <th class="py-2 text-left">Phone</th>
+                                <th class="py-2 text-left">Status</th>
+                                <th class="py-2 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="supplierComposer" class="glass-card p-5 composer-panel hidden">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Supplier composer</p>
+                        <h3 id="supplierComposerTitle" class="text-xl font-semibold">Add Supplier</h3>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetSupplierForm()">Close</button>
+                </div>
+                <form id="supplierForm" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <input type="hidden" id="supplierId">
+                    <input id="supplierName" class="input" placeholder="Supplier Name" required>
+                    <input id="supplierContact" class="input" placeholder="Contact Person">
+                    <input id="supplierEmail" class="input" type="email" placeholder="Email">
+                    <input id="supplierPhone" class="input" placeholder="Phone">
+                    <input id="supplierAddress" class="input md:col-span-2" placeholder="Address">
+                    <button type="submit" class="btn-primary">Save Supplier</button>
+                    <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetSupplierForm()">Reset</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        window.InventoryApp.initSuppliers();
+    </script>
+</body>
+</html>

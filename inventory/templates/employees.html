@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="app-bg text-slate-100 min-h-screen">
+    <div class="layout">
+        <aside class="sidebar glass-card">
+            <div>
+                <p class="eyebrow">{{ company.name }}</p>
+                <h1 class="brand-mark mt-2 mb-8">StockFlow AI</h1>
+            </div>
+            <nav class="space-y-2">
+                <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'inventory-page' %}" class="nav-item">Inventory</a>
+                <a href="{% url 'suppliers-page' %}" class="nav-item">Suppliers</a>
+                <a href="{% url 'transactions-page' %}" class="nav-item">Transactions</a>
+                <a href="{% url 'employees-page' %}" class="nav-item nav-item-active">Employees</a>
+                <a href="{% url 'settings-page' %}" class="nav-item">Settings</a>
+            </nav>
+            <div class="sidebar-panel mt-auto">
+                <p class="text-sm text-slate-300">Invite employees, assign permissions, and enforce first-login password changes.</p>
+                <a href="{% url 'logout' %}" class="btn-danger mt-4">Logout</a>
+            </div>
+        </aside>
+        <main class="content space-y-6">
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                        <div class="rounded-xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <section class="hero-card">
+                <div class="hero-copy">
+                    <p class="eyebrow">Employee management</p>
+                    <h2>Control team access for {{ company.name }}.</h2>
+                    <p class="hero-text">Invite employees with temporary passwords, assign operational permissions, and keep ownership access separate from staff actions.</p>
+                </div>
+                <div class="hero-panel">
+                    <p class="text-sm text-slate-300">Active employees</p>
+                    <h3 class="text-2xl font-bold">{{ employees|length }}</h3>
+                </div>
+            </section>
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Invite user</p>
+                        <h3 class="font-semibold text-xl">Add Employee</h3>
+                    </div>
+                </div>
+                <form method="post" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.18em] text-slate-300">{{ invite_form.full_name.label }}</label>
+                        <div class="mt-2">{{ invite_form.full_name }}</div>
+                        {% if invite_form.full_name.errors %}<div class="mt-2 text-sm text-red-200">{{ invite_form.full_name.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.18em] text-slate-300">{{ invite_form.email.label }}</label>
+                        <div class="mt-2">{{ invite_form.email }}</div>
+                        {% if invite_form.email.errors %}<div class="mt-2 text-sm text-red-200">{{ invite_form.email.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.18em] text-slate-300">{{ invite_form.job_title.label }}</label>
+                        <div class="mt-2">{{ invite_form.job_title }}</div>
+                        {% if invite_form.job_title.errors %}<div class="mt-2 text-sm text-red-200">{{ invite_form.job_title.errors }}</div>{% endif %}
+                    </div>
+                    <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
+                        {{ invite_form.can_manage_inventory }}
+                        <span>{{ invite_form.can_manage_inventory.label }}</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
+                        {{ invite_form.can_manage_employees }}
+                        <span>{{ invite_form.can_manage_employees.label }}</span>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
+                        {{ invite_form.can_view_reports }}
+                        <span>{{ invite_form.can_view_reports.label }}</span>
+                    </label>
+                    <div class="md:col-span-2 xl:col-span-3 flex justify-end">
+                        <button type="submit" class="btn-primary min-w-56">Invite Employee</button>
+                    </div>
+                </form>
+            </section>
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Directory</p>
+                        <h3 class="font-semibold text-xl">Team Members</h3>
+                    </div>
+                    <form method="get" class="toolbar-wrap">
+                        <input name="search" value="{{ search }}" class="input toolbar-input" placeholder="Search employee or email">
+                        <button class="btn-secondary" type="submit">Search</button>
+                    </form>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-sm inventory-table">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-300">
+                                <th class="py-2 text-left">Name</th>
+                                <th class="py-2 text-left">Email</th>
+                                <th class="py-2 text-left">Role</th>
+                                <th class="py-2 text-left">Inventory</th>
+                                <th class="py-2 text-left">Employees</th>
+                                <th class="py-2 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                                <tr class="border-b border-slate-800/80">
+                                    <td class="py-3">{{ employee.full_name|default:employee.user.username }}</td>
+                                    <td class="py-3">{{ employee.user.email }}</td>
+                                    <td class="py-3">{{ employee.get_role_display }}</td>
+                                    <td class="py-3">{{ employee.can_manage_inventory|yesno:'Yes,No' }}</td>
+                                    <td class="py-3">{{ employee.can_manage_employees|yesno:'Yes,No' }}</td>
+                                    <td class="py-3">{% if employee.must_change_password %}<span class="status-pill status-pill-danger">Reset Required</span>{% else %}<span class="status-pill status-pill-good">Active</span>{% endif %}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="py-4 text-slate-400">No employees found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

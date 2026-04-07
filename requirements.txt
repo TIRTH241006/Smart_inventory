@@ -1,0 +1,8 @@
+Django>=5.2,<6.1
+djangorestframework>=3.16
+django-allauth>=65.0
+PyMySQL>=1.1.1
+requests>=2.32.0
+PyJWT>=2.8.0
+cryptography>=44.0.0
+mysqlclient>=2.2.1

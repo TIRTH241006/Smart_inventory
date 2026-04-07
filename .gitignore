@@ -57,6 +57,7 @@ geckodriver.log
 phantomjs.log
 selenium/
 .venv/
+.env
 venv/
 ENV/
 env/

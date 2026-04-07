@@ -1,0 +1,10 @@
+{{ app_name }} invitation
+
+Hello {{ full_name }},
+
+You were added to {{ company_name }}.
+
+Username: {{ username }}
+Temporary password: {{ temporary_password }}
+
+Please sign in and change your password immediately on first login.

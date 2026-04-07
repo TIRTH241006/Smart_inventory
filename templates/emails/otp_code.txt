@@ -1,0 +1,8 @@
+{{ app_name }} OTP
+
+Use this one-time code to complete your {{ purpose|lower }} request for {{ email }}.
+
+OTP: {{ otp_code }}
+Expires in: {{ expires_minutes }} minutes
+
+If you did not request this, you can ignore this email.

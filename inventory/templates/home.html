@@ -1,29 +1,62 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Smart Inventory</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Smart Inventory Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+<body class="app-bg text-slate-100 min-h-screen overflow-x-hidden">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-<body class="bg-dark text-white">
+    <main class="relative max-w-7xl mx-auto px-6 py-10 md:py-16">
+        <header class="flex items-center justify-between mb-12 animate-fade-in">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">StockFlow AI</h1>
+            <div class="flex gap-3">
+                <a href="{% url 'login' %}" class="btn-secondary">Login</a>
+                <a href="{% url 'register' %}" class="btn-primary">Get Started</a>
+            </div>
+        </header>
 
-<div class="container text-center mt-5">
+        <section class="grid lg:grid-cols-2 gap-10 items-center">
+            <div class="space-y-6 animate-slide-up">
+                {% if messages %}
+                    <div class="space-y-2">
+                        {% for message in messages %}
+                            <div class="rounded-xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="inline-flex px-4 py-2 rounded-full text-xs bg-cyan-500/20 border border-cyan-300/20 text-cyan-200">Multi-Tenant Inventory SaaS</p>
+                <h2 class="text-4xl md:text-6xl font-black leading-tight">Enterprise inventory for owners, employees, and multiple companies.</h2>
+                <p class="text-slate-300 max-w-xl">Run isolated company workspaces with role-based access, OTP-secured signup, Google SSO, employee onboarding, audit logs, multi-location stock control, and real-time dashboards.</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'register' %}" class="btn-primary">Create Account</a>
+                    <a href="{% url 'login' %}" class="btn-secondary">Login</a>
+                    <a href="{% url 'otp-login' %}" class="btn-secondary">Login with OTP</a>
+                    <a href="{% url 'google-login' %}" class="btn-google">Continue with Google</a>
+                </div>
+                {% if not google_oauth_ready %}
+                    <p class="text-sm text-slate-300">Google sign-in is currently disabled until credentials are configured.</p>
+                {% endif %}
+            </div>
 
-    <h1 class="mb-4">📦 Smart Inventory System</h1>
-    <p class="mb-5">Manage your inventory efficiently with smart analytics</p>
-
-    <!-- Google Login -->
-    <a href="/accounts/google/login/" class="btn btn-danger btn-lg mb-3">
-        🔐 Login with Google
-    </a>
-
-    <br>
-
-    <!-- Manual Login -->
-    <a href="/accounts/login/" class="btn btn-light">Login</a>
-    <a href="/accounts/signup/" class="btn btn-success">Register</a>
-
-</div>
-
+            <div class="glass-card p-7 md:p-8 animate-float">
+                <h3 class="text-xl font-semibold mb-5">What you get</h3>
+                <div class="space-y-4 text-sm text-slate-200">
+                    <div class="feature-row">Isolated company workspaces with owner + employee roles</div>
+                    <div class="feature-row">Google login, email OTP verification, and passwordless OTP sign-in</div>
+                    <div class="feature-row">Employee onboarding with temporary passwords and forced reset</div>
+                    <div class="feature-row">Inventory, supplier, transaction, audit, and notification modules</div>
+                </div>
+                <div class="mt-8 p-4 rounded-xl bg-slate-900/40 border border-slate-600/30">
+                    <p class="text-xs text-slate-300">Built with Django, DRF, Tailwind, Google OAuth, company-scoped access control, and OTP-based identity flows.</p>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

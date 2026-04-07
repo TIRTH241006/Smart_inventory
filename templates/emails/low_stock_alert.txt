@@ -1,0 +1,8 @@
+{{ app_name }} low stock alert
+
+{{ product_name }} is low on stock for {{ company_name }}.
+
+Current quantity: {{ quantity }}
+Reorder level: {{ reorder_level }}
+
+Review inventory and replenish stock as soon as possible.

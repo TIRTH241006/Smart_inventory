@@ -1,0 +1,82 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Complete Sign Up" %} | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="app-bg text-slate-100 min-h-screen flex items-center justify-center px-6 py-10 overflow-x-hidden">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <main class="relative w-full max-w-5xl grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
+        <section class="space-y-6 animate-slide-up">
+            <a href="/" class="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition">StockFlow AI</a>
+            <p class="inline-flex px-4 py-2 rounded-full text-xs bg-cyan-500/20 border border-cyan-300/20 text-cyan-200">Google Authentication</p>
+            <h1 class="text-4xl md:text-5xl font-black leading-tight">Complete your account setup.</h1>
+            <p class="text-slate-300 max-w-xl">
+                {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+                You are about to use your {{ provider_name }} account to sign in to {{ site_name }}. Review the details below and finish creating your account.
+                {% endblocktrans %}
+            </p>
+            <div class="glass-card p-5 space-y-3 text-sm text-slate-200">
+                <div class="feature-row">Fast access with your Google account</div>
+                <div class="feature-row">Secure inventory dashboard and transaction tracking</div>
+                <div class="feature-row">One account for products, suppliers, and stock alerts</div>
+            </div>
+        </section>
+
+        <section class="glass-card p-7 md:p-8 animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">{% trans "Sign Up" %}</h2>
+                <p class="text-sm text-slate-300 mt-2">Confirm your account details to continue.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="mb-4 rounded-xl border border-red-300/30 bg-red-500/15 px-4 py-3 text-sm text-red-100">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'socialaccount_signup' %}" class="space-y-4">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    {% if field.is_hidden %}
+                        {{ field }}
+                    {% else %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="text-xs uppercase tracking-[0.18em] text-slate-300">{{ field.label }}</label>
+                            <div class="mt-2">{{ field }}</div>
+                            {% if field.help_text %}
+                                <p class="mt-2 text-xs text-slate-400">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="mt-2 text-sm text-red-200">
+                                    {% for error in field.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                {{ redirect_field }}
+
+                <button type="submit" class="btn-primary w-full text-center">{% trans "Create Account" %}</button>
+            </form>
+
+            <div class="mt-5 flex items-center justify-between text-sm text-slate-300">
+                <a href="{% url 'login' %}" class="underline underline-offset-4">Back to login</a>
+                <a href="/" class="underline underline-offset-4">Home</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

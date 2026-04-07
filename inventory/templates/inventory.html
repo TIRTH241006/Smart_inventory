@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="app-bg text-slate-100 min-h-screen" data-page="inventory" data-can-manage-inventory="{{ can_manage_inventory|yesno:'true,false' }}" data-can-manage-employees="{{ can_manage_employees|yesno:'true,false' }}" data-is-owner="{{ is_company_owner|yesno:'true,false' }}">
+    <div class="layout">
+        <aside class="sidebar glass-card">
+            <div>
+                <p class="eyebrow">{{ company.name|default:'Inventory OS' }}</p>
+                <h1 class="brand-mark mt-2 mb-8">StockFlow AI</h1>
+            </div>
+            <nav class="space-y-2">
+                <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'inventory-page' %}" class="nav-item nav-item-active">Inventory</a>
+                <a href="{% url 'suppliers-page' %}" class="nav-item">Suppliers</a>
+                <a href="{% url 'transactions-page' %}" class="nav-item">Transactions</a>
+                {% if can_manage_employees %}<a href="{% url 'employees-page' %}" class="nav-item">Employees</a>{% endif %}
+                {% if is_company_owner %}<a href="{% url 'settings-page' %}" class="nav-item">Settings</a>{% endif %}
+            </nav>
+            <div class="sidebar-panel mt-auto">
+                <p class="text-sm text-slate-300">Use this workspace to search inventory first, then open the composer only when you need to add or edit a product.</p>
+                <a href="{% url 'logout' %}" class="btn-danger mt-4">Logout</a>
+            </div>
+        </aside>
+
+        <main class="content space-y-5">
+            <section class="glass-card p-5">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Inventory workspace</p>
+                        <h2 class="text-2xl font-semibold">Available Products</h2>
+                    </div>
+                    <div class="hero-actions">
+                        {% if can_manage_inventory %}<button id="productComposerToggle" type="button" class="btn-primary">Add Product</button>{% endif %}
+                        <a href="{% url 'transactions-page' %}" class="btn-secondary">Record Transaction</a>
+                    </div>
+                </div>
+                <p class="text-slate-300 mt-3">Start with the current inventory list. Open the product composer only when you want to create a new item or update an existing one.</p>
+            </section>
+
+            <section class="glass-card p-5">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Stock list</p>
+                        <h3 class="font-semibold text-xl">Inventory Table</h3>
+                    </div>
+                    <div class="toolbar-wrap">
+                        <input id="productSearch" class="input toolbar-input" placeholder="Search name, category, or SKU">
+                        <select id="productStockFilter" class="input toolbar-select">
+                            <option value="all">All stock</option>
+                            <option value="low">Low stock only</option>
+                        </select>
+                        <button class="btn-secondary" onclick="window.InventoryApp.loadProducts(1)">Search</button>
+                    </div>
+                </div>
+                <div class="inventory-summary-bar mb-4">
+                    <span id="inventoryResultsMeta">Search, review stock, and edit rows directly from here.</span>
+                    <div class="summary-chips">
+                        <span class="summary-chip">Searchable</span>
+                        <span class="summary-chip">Low-stock filter</span>
+                        <span class="summary-chip">Quick edit</span>
+                    </div>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-sm inventory-table">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-300">
+                                <th class="py-2 text-left">Product</th>
+                                <th class="py-2 text-left">SKU</th>
+                                <th class="py-2 text-left">Category</th>
+                                <th class="py-2 text-left">Available</th>
+                                <th class="py-2 text-left">Supplier</th>
+                                <th class="py-2 text-left">Status</th>
+                                <th class="py-2 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable"></tbody>
+                    </table>
+                </div>
+                <div id="productsPagination" class="mt-4 flex gap-2"></div>
+            </section>
+
+            <section id="productComposer" class="glass-card p-5 composer-panel hidden">
+                <div class="section-heading mb-4">
+                    <div>
+                        <p class="eyebrow">Product composer</p>
+                        <h3 id="productComposerTitle" class="text-xl font-semibold">Add Product</h3>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetProductForm()">Close</button>
+                </div>
+                <form id="productForm" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <input type="hidden" id="productId">
+                    <input id="productName" class="input" placeholder="Name" required>
+                    <input id="productSku" class="input" placeholder="SKU" required>
+                    <input id="productCategory" class="input" placeholder="Category" required>
+                    <input id="productQuantity" class="input" type="number" min="0" placeholder="Quantity" required>
+                    <input id="productPrice" class="input" type="number" min="0" step="0.01" placeholder="Price" required>
+                    <input id="productReorder" class="input" type="number" min="0" placeholder="Reorder Level" required>
+                    <select id="productLocation" class="input"></select>
+                    <select id="productSupplier" class="input"></select>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                    <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetProductForm()">Reset</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        window.InventoryApp.initInventory();
+    </script>
+</body>
+</html>

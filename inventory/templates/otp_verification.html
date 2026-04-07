@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP | StockFlow AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="app-bg text-slate-100 min-h-screen flex items-center justify-center px-6">
+    <div class="glass-card w-full max-w-md p-7 animate-slide-up">
+        <p class="eyebrow mb-3">Verification</p>
+        <h1 class="text-2xl font-bold mb-2">Enter your OTP</h1>
+        <p class="text-sm text-slate-300 mb-6">We sent a 6-digit code to {{ pending_email }}.</p>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="rounded-xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-sm text-amber-100 mb-4">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="text-xs uppercase tracking-[0.18em] text-slate-300">{{ form.code.label }}</label>
+                <div class="mt-2">{{ form.code }}</div>
+                {% if form.code.errors %}<div class="mt-2 text-sm text-red-200">{{ form.code.errors }}</div>{% endif %}
+            </div>
+            <button type="submit" class="btn-primary w-full">Verify OTP</button>
+        </form>
+        <p class="mt-5 text-sm text-slate-300"><a href="{% url 'login' %}" class="underline">Back to login</a></p>
+    </div>
+</body>
+</html>
