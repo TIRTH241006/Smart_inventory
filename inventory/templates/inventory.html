@@ -77,6 +77,7 @@
                                 <th class="py-2 text-left">Available</th>
                                 <th class="py-2 text-left">Supplier</th>
                                 <th class="py-2 text-left">Status</th>
+                                <th class="py-2 text-left">Document</th>
                                 <th class="py-2 text-left">Actions</th>
                             </tr>
                         </thead>
@@ -103,8 +104,10 @@
                     <input id="productPrice" class="input" type="number" min="0" step="0.01" placeholder="Price" required>
                     <input id="productReorder" class="input" type="number" min="0" placeholder="Reorder Level" required>
                     <select id="productLocation" class="input"></select>
-                    <select id="productSupplier" class="input"></select>
-                    <button type="submit" class="btn-primary">Save Product</button>
+                    <select id="productSupplier" class="input"></select>                    <div class="md:col-span-2 lg:col-span-3">
+                        <input id="productDocument" type="file" accept=".pdf" class="input" placeholder="Product Document (PDF)">
+                        <p class="text-xs text-slate-400 mt-1">Optional: Upload product manual, specification sheet, or other documentation</p>
+                    </div>                    <button type="submit" class="btn-primary">Save Product</button>
                     <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetProductForm()">Reset</button>
                 </form>
             </section>

@@ -67,6 +67,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "reorder_level",
             "sku",
+            "document",
             "is_active",
             "is_low_stock",
             "created_at",

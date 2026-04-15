@@ -141,6 +141,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     reorder_level = models.IntegerField(default=5)
     sku = models.CharField(max_length=64, null=True, blank=True)
+    document = models.FileField(upload_to='product_docs/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
     updated_at = models.DateTimeField(default=timezone.now, null=True, blank=True)

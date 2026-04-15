@@ -359,6 +359,7 @@
     return products
       .map((product) => {
         const status = getProductStatus(product);
+        const documentLink = product.document ? `<a href="/media/${product.document}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>` : "-";
         const actions = access.canManageInventory
           ? `
               <button class="btn-secondary" data-edit-product="${encodeURIComponent(JSON.stringify(product))}">Edit</button>
@@ -376,6 +377,7 @@
             <td class="py-3 ${product.is_low_stock ? "text-amber-200 font-semibold" : "text-slate-100"}">${escapeHtml(product.quantity)}</td>
             <td class="py-3">${escapeHtml(product.supplier_name || "-")}</td>
             <td class="py-3"><span class="${status.className}">${status.label}</span></td>
+            <td class="py-3">${documentLink}</td>
             <td class="py-3 space-x-2">${actions}</td>
           </tr>
         `;
@@ -519,6 +521,9 @@
     const form = document.getElementById("productForm");
     if (form) form.reset();
     if (document.getElementById("productId")) document.getElementById("productId").value = "";
+    // Reset file input separately
+    const fileInput = document.getElementById("productDocument");
+    if (fileInput) fileInput.value = "";
     setText("productComposerTitle", "Add Product");
     toggleProductComposer(false);
   }
@@ -542,23 +547,43 @@
   async function saveProduct(event) {
     event.preventDefault();
     const id = document.getElementById("productId")?.value;
-    const payload = {
-      name: document.getElementById("productName").value,
-      sku: document.getElementById("productSku").value,
-      category: document.getElementById("productCategory").value,
-      quantity: Number(document.getElementById("productQuantity").value),
-      price: document.getElementById("productPrice").value,
-      reorder_level: Number(document.getElementById("productReorder").value),
-      location: document.getElementById("productLocation")?.value || null,
-      supplier: document.getElementById("productSupplier")?.value || null,
-      is_active: true,
+    
+    const formData = new FormData();
+    formData.append("name", document.getElementById("productName").value);
+    formData.append("sku", document.getElementById("productSku").value);
+    formData.append("category", document.getElementById("productCategory").value);
+    formData.append("quantity", Number(document.getElementById("productQuantity").value));
+    formData.append("price", document.getElementById("productPrice").value);
+    formData.append("reorder_level", Number(document.getElementById("productReorder").value));
+    formData.append("location", document.getElementById("productLocation")?.value || "");
+    formData.append("supplier", document.getElementById("productSupplier")?.value || "");
+    formData.append("is_active", "true");
+    formData.append("csrfmiddlewaretoken", csrfToken());
+    
+    const documentFile = document.getElementById("productDocument").files[0];
+    if (documentFile) {
+      formData.append("document", documentFile);
+    }
+
+    const config = {
+      method: id ? "PUT" : "POST",
+      credentials: "same-origin",
+      body: formData,
     };
 
-    if (id) {
-      await request(`${apiRoot}/products/${id}/`, { method: "PUT", body: JSON.stringify(payload) });
-    } else {
-      await request(`${apiRoot}/products/`, { method: "POST", body: JSON.stringify(payload) });
+    const url = id ? `${apiRoot}/products/${id}/` : `${apiRoot}/products/`;
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      let error = "Request failed";
+      try {
+        const data = await response.json();
+        error = data.detail || JSON.stringify(data);
+      } catch (_error) {
+        error = response.statusText;
+      }
+      throw new Error(error);
     }
+
     resetProductForm();
     await loadProducts(1);
     if (document.body.dataset.page === "dashboard") {
@@ -741,7 +766,9 @@
     if (tbody) {
       tbody.innerHTML = (data.results || [])
         .map(
-          (tx) => `
+          (tx) => {
+            const pdfLink = tx.invoice_pdf ? `<a href="/media/${tx.invoice_pdf}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>` : "-";
+            return `
             <tr class="border-b border-slate-800/80">
               <td class="py-3 font-semibold text-slate-50">${escapeHtml(tx.product_name)}<div class="text-xs text-slate-400 mt-1">${escapeHtml(tx.location_name || "No location")}</div></td>
               <td class="py-3"><span class="${tx.transaction_type === "IN" ? "status-pill status-pill-good" : "status-pill status-pill-danger"}">${escapeHtml(tx.transaction_type)}</span></td>
@@ -749,8 +776,10 @@
               <td class="py-3">${escapeHtml(tx.performed_by_username || "-")}</td>
               <td class="py-3">${formatDate(tx.created_at)}</td>
               <td class="py-3">${escapeHtml(tx.note || "-")}</td>
+              <td class="py-3">${pdfLink}</td>
             </tr>
-          `,
+          `;
+          },
         )
         .join("");
     }
