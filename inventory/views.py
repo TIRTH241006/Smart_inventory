@@ -557,11 +557,20 @@ class TransactionViewSet(CompanyScopedViewSet):
             try:
                 with pdfplumber.open(transaction_obj.invoice_pdf.path) as pdf:
                     text = ""
-                    for page in pdf.pages:
-                        text += page.extract_text() or ""
+                    # Extract text from first 2 pages only to avoid too much content
+                    for i, page in enumerate(pdf.pages):
+                        if i >= 2:  # Limit to first 2 pages
+                            break
+                        page_text = page.extract_text() or ""
+                        text += page_text + "\n"
+                    
                     if text.strip():
-                        # Extract supplier info or append to note
-                        extracted_info = f"Invoice content: {text[:500]}..."  # Limit to 500 chars
+                        # Clean up the text and limit length
+                        cleaned_text = text.strip()[:1000]  # Allow up to 1000 chars
+                        extracted_info = f"Invoice content: {cleaned_text}"
+                        if len(extracted_info) > 1000:
+                            extracted_info = extracted_info[:997] + "..."
+                        
                         if transaction_obj.note:
                             transaction_obj.note += f" | {extracted_info}"
                         else:
@@ -570,6 +579,13 @@ class TransactionViewSet(CompanyScopedViewSet):
             except Exception as e:
                 # Log error but don't fail the transaction
                 print(f"Error extracting PDF: {e}")
+                # Add a note about the PDF upload even if extraction failed
+                pdf_note = f"PDF uploaded: {transaction_obj.invoice_pdf.name}"
+                if transaction_obj.note:
+                    transaction_obj.note += f" | {pdf_note}"
+                else:
+                    transaction_obj.note = pdf_note
+                transaction_obj.save(update_fields=['note'])
 
         product = Product.objects.select_for_update().get(pk=transaction_obj.product_id)
 
