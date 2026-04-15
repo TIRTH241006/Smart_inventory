@@ -359,7 +359,14 @@
     return products
       .map((product) => {
         const status = getProductStatus(product);
-        const documentLink = product.document ? `<a href="/media/${product.document}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>` : "-";
+        let documentLink = "-";
+        if (product.document) {
+          // Handle both full URLs and relative paths
+          const docUrl = product.document.startsWith('http') 
+            ? new URL(product.document).pathname 
+            : product.document;
+          documentLink = `<a href="${docUrl}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>`;
+        }
         const actions = access.canManageInventory
           ? `
               <button class="btn-secondary" data-edit-product="${encodeURIComponent(JSON.stringify(product))}">Edit</button>
@@ -767,7 +774,14 @@
       tbody.innerHTML = (data.results || [])
         .map(
           (tx) => {
-            const pdfLink = tx.invoice_pdf ? `<a href="/media/${tx.invoice_pdf}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>` : "-";
+            let pdfLink = "-";
+            if (tx.invoice_pdf) {
+              // Handle both full URLs and relative paths
+              const pdfUrl = tx.invoice_pdf.startsWith('http') 
+                ? new URL(tx.invoice_pdf).pathname 
+                : tx.invoice_pdf;
+              pdfLink = `<a href="${pdfUrl}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">View PDF</a>`;
+            }
             return `
             <tr class="border-b border-slate-800/80">
               <td class="py-3 font-semibold text-slate-50">${escapeHtml(tx.product_name)}<div class="text-xs text-slate-400 mt-1">${escapeHtml(tx.location_name || "No location")}</div></td>
