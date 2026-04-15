@@ -761,43 +761,58 @@
 
   async function saveTransaction(event) {
     event.preventDefault();
+    console.log("Starting transaction save...");
+    
     const formData = new FormData();
     formData.append("product", Number(document.getElementById("transactionProduct").value));
     formData.append("location", document.getElementById("transactionLocation")?.value || "");
     formData.append("transaction_type", document.getElementById("transactionType").value);
     formData.append("quantity", Number(document.getElementById("transactionQuantity").value));
     formData.append("note", document.getElementById("transactionNote").value);
+    formData.append("csrfmiddlewaretoken", csrfToken());
     
     const invoiceFile = document.getElementById("transactionInvoicePdf").files[0];
     if (invoiceFile) {
+      console.log("Adding invoice file:", invoiceFile.name);
       formData.append("invoice_pdf", invoiceFile);
     }
 
+    console.log("Form data prepared, sending request...");
     const config = {
       method: "POST",
       credentials: "same-origin",
-      headers: {
-        "X-CSRFToken": csrfToken(),
-      },
       body: formData,
     };
 
-    const response = await fetch(`${apiRoot}/transactions/`, config);
-    if (!response.ok) {
-      let error = "Request failed";
-      try {
-        const data = await response.json();
-        error = data.detail || JSON.stringify(data);
-      } catch (_error) {
-        error = response.statusText;
+    try {
+      const response = await fetch(`${apiRoot}/transactions/`, config);
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        let error = "Request failed";
+        try {
+          const data = await response.json();
+          console.error("Error response:", data);
+          error = data.detail || JSON.stringify(data);
+        } catch (_error) {
+          const text = await response.text();
+          console.error("Error response text:", text);
+          error = response.statusText;
+        }
+        throw new Error(error);
       }
-      throw new Error(error);
-    }
 
-    resetTransactionForm();
-    await loadTransactions(1);
-    if (document.body.dataset.page === "dashboard") {
-      await initDashboard();
+      const result = await response.json();
+      console.log("Success response:", result);
+      
+      resetTransactionForm();
+      await loadTransactions(1);
+      if (document.body.dataset.page === "dashboard") {
+        await initDashboard();
+      }
+    } catch (error) {
+      console.error("Transaction save failed:", error);
+      alert("Failed to save transaction: " + error.message);
     }
   }
 
