@@ -827,11 +827,16 @@
     const typeSelect = document.getElementById("transactionType");
     const invoiceContainer = document.getElementById("invoiceUploadContainer");
     if (typeSelect && invoiceContainer) {
-      typeSelect.addEventListener("change", function() {
-        invoiceContainer.classList.toggle("hidden", this.value !== "IN");
-      });
+      const updateVisibility = function() {
+        if (typeSelect.value === "IN") {
+          invoiceContainer.classList.remove("hidden");
+        } else {
+          invoiceContainer.classList.add("hidden");
+        }
+      };
+      typeSelect.addEventListener("change", updateVisibility);
       // Initial state
-      invoiceContainer.classList.toggle("hidden", typeSelect.value !== "IN");
+      updateVisibility();
     }
     
     bindTransactionComposerToggle();
