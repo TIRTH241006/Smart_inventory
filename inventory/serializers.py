@@ -104,6 +104,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             "quantity",
             "transaction_type",
             "note",
+            "invoice_pdf",
             "performed_by",
             "performed_by_username",
             "created_at",

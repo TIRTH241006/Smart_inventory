@@ -183,6 +183,7 @@ class Transaction(models.Model):
     quantity = models.IntegerField()
     transaction_type = models.CharField(max_length=3, choices=TRANSACTION_TYPE)
     note = models.CharField(max_length=255, blank=True)
+    invoice_pdf = models.FileField(upload_to='invoices/', null=True, blank=True)
     performed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="inventory_transactions",

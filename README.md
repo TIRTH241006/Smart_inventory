@@ -15,6 +15,41 @@ A full-stack Django + DRF inventory platform with secure authentication, Google 
 - Django admin support for all core entities
 - Responsive Tailwind-based modern UI with animations
 
+## Planned Features
+
+- PDF upload integration for invoices in stock transactions (record supplier info and item origin)
+- Barcode scanning integration
+- Mobile app companion
+- Advanced reporting and analytics
+- Multi-location warehouse support
+- API rate limiting and caching
+- Email notifications for low stock
+- Bulk import/export functionality
+
+## Technical Improvements
+
+- GraphQL API alongside REST
+- Real-time updates with WebSockets
+- Containerization with Docker
+- CI/CD pipeline setup
+- Performance optimization and caching
+
+## Deployment Considerations
+
+- Production Setup
+- Environment variables for secrets
+- Cloud database (AWS RDS, Google Cloud SQL)
+- Static file serving (AWS S3, CloudFront)
+- SSL/TLS certificates
+- Monitoring and logging
+
+## Scaling Strategies
+
+- Database indexing and query optimization
+- Caching layer (Redis)
+- Load balancing
+- Microservices architecture for larger scale
+
 ## Stack
 
 - Backend: Django, Django REST Framework

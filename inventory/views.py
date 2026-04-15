@@ -1,4 +1,5 @@
 import csv
+import pdfplumber
 
 from django.conf import settings
 from django.contrib import messages
@@ -550,6 +551,26 @@ class TransactionViewSet(CompanyScopedViewSet):
 
         location = serializer.validated_data.get("location") or product.location or get_default_location(company)
         transaction_obj = serializer.save(company=company, performed_by=self.request.user, location=location)
+        
+        # Handle PDF invoice extraction for STOCK_IN
+        if transaction_obj.transaction_type == Transaction.STOCK_IN and transaction_obj.invoice_pdf:
+            try:
+                with pdfplumber.open(transaction_obj.invoice_pdf.path) as pdf:
+                    text = ""
+                    for page in pdf.pages:
+                        text += page.extract_text() or ""
+                    if text.strip():
+                        # Extract supplier info or append to note
+                        extracted_info = f"Invoice content: {text[:500]}..."  # Limit to 500 chars
+                        if transaction_obj.note:
+                            transaction_obj.note += f" | {extracted_info}"
+                        else:
+                            transaction_obj.note = extracted_info
+                        transaction_obj.save(update_fields=['note'])
+            except Exception as e:
+                # Log error but don't fail the transaction
+                print(f"Error extracting PDF: {e}")
+
         product = Product.objects.select_for_update().get(pk=transaction_obj.product_id)
 
         if transaction_obj.transaction_type == Transaction.STOCK_IN:

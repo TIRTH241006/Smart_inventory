@@ -123,6 +123,9 @@
                     </select>
                     <input id="transactionQuantity" type="number" min="1" class="input" placeholder="Quantity" required>
                     <input id="transactionNote" class="input" placeholder="Note (optional)">
+                    <div id="invoiceUploadContainer" class="hidden">
+                        <input id="transactionInvoicePdf" type="file" accept=".pdf" class="input" placeholder="Invoice PDF (optional)">
+                    </div>
                     <button type="submit" class="btn-primary">Record Transaction</button>
                     <button type="button" class="btn-secondary" onclick="window.InventoryApp.resetTransactionForm()">Reset</button>
                 </form>

@@ -709,6 +709,9 @@
   function resetTransactionForm() {
     const form = document.getElementById("transactionForm");
     if (form) form.reset();
+    // Reset file input separately
+    const fileInput = document.getElementById("transactionInvoicePdf");
+    if (fileInput) fileInput.value = "";
     toggleTransactionComposer(false);
   }
 
@@ -758,14 +761,39 @@
 
   async function saveTransaction(event) {
     event.preventDefault();
-    const payload = {
-      product: Number(document.getElementById("transactionProduct").value),
-      location: document.getElementById("transactionLocation")?.value || null,
-      transaction_type: document.getElementById("transactionType").value,
-      quantity: Number(document.getElementById("transactionQuantity").value),
-      note: document.getElementById("transactionNote").value,
+    const formData = new FormData();
+    formData.append("product", Number(document.getElementById("transactionProduct").value));
+    formData.append("location", document.getElementById("transactionLocation")?.value || "");
+    formData.append("transaction_type", document.getElementById("transactionType").value);
+    formData.append("quantity", Number(document.getElementById("transactionQuantity").value));
+    formData.append("note", document.getElementById("transactionNote").value);
+    
+    const invoiceFile = document.getElementById("transactionInvoicePdf").files[0];
+    if (invoiceFile) {
+      formData.append("invoice_pdf", invoiceFile);
+    }
+
+    const config = {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": csrfToken(),
+      },
+      body: formData,
     };
-    await request(`${apiRoot}/transactions/`, { method: "POST", body: JSON.stringify(payload) });
+
+    const response = await fetch(`${apiRoot}/transactions/`, config);
+    if (!response.ok) {
+      let error = "Request failed";
+      try {
+        const data = await response.json();
+        error = data.detail || JSON.stringify(data);
+      } catch (_error) {
+        error = response.statusText;
+      }
+      throw new Error(error);
+    }
+
     resetTransactionForm();
     await loadTransactions(1);
     if (document.body.dataset.page === "dashboard") {
@@ -794,6 +822,18 @@
       transactionForm.dataset.bound = "true";
       transactionForm.addEventListener("submit", saveTransaction);
     }
+    
+    // Toggle invoice upload based on transaction type
+    const typeSelect = document.getElementById("transactionType");
+    const invoiceContainer = document.getElementById("invoiceUploadContainer");
+    if (typeSelect && invoiceContainer) {
+      typeSelect.addEventListener("change", function() {
+        invoiceContainer.classList.toggle("hidden", this.value !== "IN");
+      });
+      // Initial state
+      invoiceContainer.classList.toggle("hidden", typeSelect.value !== "IN");
+    }
+    
     bindTransactionComposerToggle();
     bindTransactionFilters();
     await loadTransactions(1);
