@@ -24,7 +24,7 @@
                 <a href="{% url 'settings-page' %}" class="nav-item">Settings</a>
             </nav>
             <div class="sidebar-panel mt-auto">
-                <p class="text-sm text-slate-300">Invite employees, assign permissions, and enforce first-login password changes.</p>
+                <p class="text-sm text-slate-300">Only company admins can invite employees, assign permissions, and enforce first-login password changes.</p>
                 <a href="{% url 'logout' %}" class="btn-danger mt-4">Logout</a>
             </div>
         </aside>
@@ -40,7 +40,7 @@
                 <div class="hero-copy">
                     <p class="eyebrow">Employee management</p>
                     <h2>Control team access for {{ company.name }}.</h2>
-                    <p class="hero-text">Invite employees with temporary passwords, assign operational permissions, and keep ownership access separate from staff actions.</p>
+                    <p class="hero-text">Invite employees with temporary passwords, assign operational permissions, and keep admin access separate from staff actions. Employees cannot create their own accounts.</p>
                 </div>
                 <div class="hero-panel">
                     <p class="text-sm text-slate-300">Active employees</p>
@@ -52,6 +52,7 @@
                     <div>
                         <p class="eyebrow">Invite user</p>
                         <h3 class="font-semibold text-xl">Add Employee</h3>
+                        <p class="text-sm text-slate-300 mt-2">Employee accounts are invite-only and can only be created by a company admin.</p>
                     </div>
                 </div>
                 <form method="post" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -74,10 +75,6 @@
                     <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
                         {{ invite_form.can_manage_inventory }}
                         <span>{{ invite_form.can_manage_inventory.label }}</span>
-                    </label>
-                    <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
-                        {{ invite_form.can_manage_employees }}
-                        <span>{{ invite_form.can_manage_employees.label }}</span>
                     </label>
                     <label class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm">
                         {{ invite_form.can_view_reports }}

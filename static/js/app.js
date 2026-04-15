@@ -263,6 +263,36 @@
     }
   }
 
+  function initPasswordToggles(root) {
+    const scope = root || document;
+    const toggles = scope.querySelectorAll("[data-password-toggle]");
+
+    toggles.forEach((toggle) => {
+      if (toggle.dataset.bound === "true") return;
+
+      const container = toggle.closest(".password-field");
+      const input = container ? container.querySelector("input") : null;
+      if (!input) return;
+
+      toggle.dataset.bound = "true";
+      input.dataset.passwordInput = "true";
+
+      function syncState(isVisible) {
+        container.classList.toggle("password-visible", isVisible);
+        toggle.setAttribute("aria-label", isVisible ? "Hide password" : "Show password");
+        toggle.setAttribute("aria-pressed", isVisible ? "true" : "false");
+      }
+
+      syncState(input.type === "text");
+
+      toggle.addEventListener("click", function () {
+        const shouldShow = input.type === "password";
+        input.type = shouldShow ? "text" : "password";
+        syncState(shouldShow);
+      });
+    });
+  }
+
   async function fetchSuppliersSimple() {
     const data = await request(`${apiRoot}/suppliers/?page_size=200`);
     return data.results || data;
@@ -774,6 +804,7 @@
     initInventory,
     initSuppliers,
     initTransactions,
+    initPasswordToggles,
     loadProducts,
     resetProductForm,
     editProduct,
@@ -785,4 +816,12 @@
     loadTransactions,
     resetTransactionForm,
   };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      initPasswordToggles();
+    });
+  } else {
+    initPasswordToggles();
+  }
 })();

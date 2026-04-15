@@ -47,8 +47,8 @@
                     </div>
                 </div>
                 <div class="hero-panel">
-                    <p class="text-sm text-slate-300">Signed in as</p>
-                    <h3 class="text-2xl font-bold">{{ request.user.username }}</h3>
+                    <p class="text-sm text-slate-300">Company workspace</p>
+                    <h3 class="text-2xl font-bold">{{ company.name|default:'Your Company' }}</h3>
                     <div class="hero-mini-stats">
                         <div>
                             <span>Total units</span>

@@ -76,3 +76,27 @@ python manage.py runserver
 - Session authentication and CSRF protection are enabled.
 - ORM usage protects against SQL injection when using provided APIs.
 - For deployment, set `DJANGO_DEBUG=False` and use secure host/origin values.
+
+## Cloud Database
+
+To keep your data safe even if the project folder is deleted locally, move the database to a managed cloud service and keep only code in Git.
+
+Recommended flow:
+
+1. Create a managed database on a provider such as Neon, Supabase Postgres, Railway Postgres, Aiven, PlanetScale, or a hosted MySQL service.
+2. Copy the provider connection string into `.env` as `DATABASE_URL`.
+3. Set `DJANGO_DEBUG=False`, update `DJANGO_ALLOWED_HOSTS`, and update `DJANGO_CSRF_TRUSTED_ORIGINS` for your deployed domain.
+4. Run migrations against the cloud database:
+
+```bash
+python manage.py migrate
+```
+
+5. If you already have local data to move, export it first and then import it into the cloud database:
+
+```bash
+python manage.py dumpdata --exclude contenttypes --exclude auth.permission > data.json
+python manage.py loaddata data.json
+```
+
+The app now supports cloud databases using `DATABASE_URL` for PostgreSQL or MySQL. If `DATABASE_URL` is not set, it falls back to the existing local database settings.

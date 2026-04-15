@@ -37,7 +37,7 @@ class EmployeeProfile(models.Model):
     ROLE_OWNER = "owner"
     ROLE_EMPLOYEE = "employee"
     ROLE_CHOICES = (
-        (ROLE_OWNER, "Company Owner"),
+        (ROLE_OWNER, "Admin"),
         (ROLE_EMPLOYEE, "Employee"),
     )
 
@@ -66,6 +66,10 @@ class EmployeeProfile(models.Model):
     @property
     def is_owner(self):
         return self.role == self.ROLE_OWNER
+
+    @property
+    def is_admin(self):
+        return self.is_owner or (self.can_manage_inventory and self.can_manage_employees and self.can_view_reports)
 
 
 class WarehouseLocation(models.Model):

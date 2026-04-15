@@ -16,23 +16,23 @@
         <section class="space-y-6 animate-slide-up">
             <a href="/" class="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition">StockFlow AI</a>
             <p class="inline-flex px-4 py-2 rounded-full text-xs bg-cyan-500/20 border border-cyan-300/20 text-cyan-200">Google Authentication</p>
-            <h1 class="text-4xl md:text-5xl font-black leading-tight">Complete your account setup.</h1>
+            <h1 class="text-4xl md:text-5xl font-black leading-tight">Complete your admin account setup.</h1>
             <p class="text-slate-300 max-w-xl">
                 {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
-                You are about to use your {{ provider_name }} account to sign in to {{ site_name }}. Review the details below and finish creating your account.
+                You are about to use your {{ provider_name }} account to sign in to {{ site_name }}. Review the details below and finish creating your company admin account.
                 {% endblocktrans %}
             </p>
             <div class="glass-card p-5 space-y-3 text-sm text-slate-200">
-                <div class="feature-row">Fast access with your Google account</div>
+                <div class="feature-row">Fast access with your Google admin account</div>
                 <div class="feature-row">Secure inventory dashboard and transaction tracking</div>
-                <div class="feature-row">One account for products, suppliers, and stock alerts</div>
+                <div class="feature-row">Employee accounts remain invite-only from inside your workspace</div>
             </div>
         </section>
 
         <section class="glass-card p-7 md:p-8 animate-fade-in">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold">{% trans "Sign Up" %}</h2>
-                <p class="text-sm text-slate-300 mt-2">Confirm your account details to continue.</p>
+                <h2 class="text-2xl font-bold">{% trans "Create Admin Account" %}</h2>
+                <p class="text-sm text-slate-300 mt-2">Confirm your account details to create your company admin workspace.</p>
             </div>
 
             {% if form.non_field_errors %}
@@ -69,7 +69,7 @@
 
                 {{ redirect_field }}
 
-                <button type="submit" class="btn-primary w-full text-center">{% trans "Create Account" %}</button>
+                <button type="submit" class="btn-primary w-full text-center">{% trans "Create Admin Account" %}</button>
             </form>
 
             <div class="mt-5 flex items-center justify-between text-sm text-slate-300">

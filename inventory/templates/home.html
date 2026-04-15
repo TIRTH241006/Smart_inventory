@@ -17,7 +17,7 @@
             <h1 class="text-2xl md:text-3xl font-bold tracking-tight">StockFlow AI</h1>
             <div class="flex gap-3">
                 <a href="{% url 'login' %}" class="btn-secondary">Login</a>
-                <a href="{% url 'register' %}" class="btn-primary">Get Started</a>
+                <a href="{% url 'register' %}" class="btn-primary">Create a New Account</a>
             </div>
         </header>
 
@@ -31,13 +31,11 @@
                     </div>
                 {% endif %}
                 <p class="inline-flex px-4 py-2 rounded-full text-xs bg-cyan-500/20 border border-cyan-300/20 text-cyan-200">Multi-Tenant Inventory SaaS</p>
-                <h2 class="text-4xl md:text-6xl font-black leading-tight">Enterprise inventory for owners, employees, and multiple companies.</h2>
-                <p class="text-slate-300 max-w-xl">Run isolated company workspaces with role-based access, OTP-secured signup, Google SSO, employee onboarding, audit logs, multi-location stock control, and real-time dashboards.</p>
+                <h2 class="text-4xl md:text-6xl font-black leading-tight">Enterprise inventory for admins, invited employees, and multiple companies.</h2>
+                <p class="text-slate-300 max-w-xl">Create a company admin workspace with OTP-secured signup or Google SSO, then invite employees from inside your company dashboard. Employee accounts are invite-only.</p>
                 <div class="flex flex-wrap gap-3">
-                    <a href="{% url 'register' %}" class="btn-primary">Create Account</a>
                     <a href="{% url 'login' %}" class="btn-secondary">Login</a>
-                    <a href="{% url 'otp-login' %}" class="btn-secondary">Login with OTP</a>
-                    <a href="{% url 'google-login' %}" class="btn-google">Continue with Google</a>
+                    <a href="{% url 'register' %}" class="btn-primary">Create Admin Account</a>
                 </div>
                 {% if not google_oauth_ready %}
                     <p class="text-sm text-slate-300">Google sign-in is currently disabled until credentials are configured.</p>
@@ -47,9 +45,9 @@
             <div class="glass-card p-7 md:p-8 animate-float">
                 <h3 class="text-xl font-semibold mb-5">What you get</h3>
                 <div class="space-y-4 text-sm text-slate-200">
-                    <div class="feature-row">Isolated company workspaces with owner + employee roles</div>
+                    <div class="feature-row">Isolated company workspaces with admin + invited employee roles</div>
                     <div class="feature-row">Google login, email OTP verification, and passwordless OTP sign-in</div>
-                    <div class="feature-row">Employee onboarding with temporary passwords and forced reset</div>
+                    <div class="feature-row">Employee onboarding is admin-invite only with temporary passwords and forced reset</div>
                     <div class="feature-row">Inventory, supplier, transaction, audit, and notification modules</div>
                 </div>
                 <div class="mt-8 p-4 rounded-xl bg-slate-900/40 border border-slate-600/30">

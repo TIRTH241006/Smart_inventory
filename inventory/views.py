@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from allauth.socialaccount.models import SocialApp
+from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.google.views import oauth2_login as google_oauth2_login
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -93,9 +94,9 @@ def base_template_context(request):
             {
                 "profile": profile,
                 "company": company,
-                "is_company_owner": profile.is_owner,
-                "can_manage_inventory": profile.is_owner or profile.can_manage_inventory,
-                "can_manage_employees": profile.is_owner or profile.can_manage_employees,
+                "is_company_owner": profile.is_admin,
+                "can_manage_inventory": profile.is_admin or profile.can_manage_inventory,
+                "can_manage_employees": profile.is_admin or profile.can_manage_employees,
                 "recent_notifications": company.notifications.filter(is_read=False)[:5],
             }
         )
@@ -110,9 +111,9 @@ def render_page(request, template_name, context=None):
 
 def owner_required(request):
     profile = get_user_profile(request.user)
-    if profile.is_owner:
+    if profile.is_admin:
         return None
-    messages.error(request, "Only company owners can access that section.")
+    messages.error(request, "Only company admins can access that section.")
     return redirect("dashboard")
 
 
@@ -139,6 +140,25 @@ def login_view(request):
     if request.method == "POST" and form.is_valid():
         identifier = form.cleaned_data["email"].strip()
         password = form.cleaned_data["password"]
+        email_matches = list(User.objects.filter(email__iexact=identifier).order_by("id"))
+        username_match = User.objects.filter(username__iexact=identifier).first()
+
+        matched_user = None
+        if email_matches:
+            matched_user = next(
+                (
+                    user
+                    for user in email_matches
+                    if user.has_usable_password() and not SocialAccount.objects.filter(user=user, provider="google").exists()
+                ),
+                email_matches[0],
+            )
+        elif username_match:
+            matched_user = username_match
+
+        if matched_user and SocialAccount.objects.filter(user=matched_user, provider="google").exists():
+            messages.error(request, "This account uses Google sign-in. Continue with Google to access it.")
+            return render_page(request, "login.html", {"form": form})
         user = authenticate(request, username=identifier, password=password)
         if user is None:
             messages.error(request, "Invalid email/username or password.")
@@ -180,7 +200,7 @@ def register_view(request):
         otp = issue_otp(user, user.email, "signup")
         request.session["pending_signup_email"] = user.email
         request.session["pending_signup_company_id"] = company.id
-        messages.success(request, f"Verification OTP generated. {otp_feedback_message(otp)} Enter it to activate your company workspace.")
+        messages.success(request, f"Verification OTP generated. {otp_feedback_message(otp)} Enter it to activate your company admin workspace.")
         return redirect("verify-otp")
 
     return render_page(request, "register.html", {"form": form})
@@ -190,7 +210,7 @@ def register_view(request):
 def verify_otp_view(request):
     pending_email = request.session.get("pending_signup_email")
     if not pending_email:
-        messages.info(request, "Start signup or OTP login first.")
+        messages.info(request, "Start admin signup or OTP login first.")
         return redirect("register")
 
     form = OTPVerificationForm(request.POST or None)
@@ -209,10 +229,10 @@ def verify_otp_view(request):
             profile.email_verified = True
             profile.save(update_fields=["email_verified", "updated_at"])
             login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
-            create_audit_log(profile.company, user, "signup_verified", "user", user.id, "Owner verified manual signup")
+            create_audit_log(profile.company, user, "signup_verified", "user", user.id, "Admin verified manual signup")
             request.session.pop("pending_signup_email", None)
             request.session.pop("pending_signup_company_id", None)
-            messages.success(request, "Your company workspace is now active.")
+            messages.success(request, "Your company admin workspace is now active.")
             return redirect("dashboard")
 
     return render_page(request, "otp_verification.html", {"form": form, "pending_email": pending_email, "otp_mode": "signup"})
@@ -384,7 +404,7 @@ def employee_page(request):
             full_name=invite_form.cleaned_data["full_name"],
             job_title=invite_form.cleaned_data["job_title"],
             can_manage_inventory=invite_form.cleaned_data["can_manage_inventory"],
-            can_manage_employees=invite_form.cleaned_data["can_manage_employees"],
+            can_manage_employees=False,
             can_view_reports=invite_form.cleaned_data["can_view_reports"],
             must_change_password=True,
             email_verified=True,
@@ -470,8 +490,8 @@ class ProductViewSet(CompanyScopedViewSet):
 
     def perform_destroy(self, instance):
         profile = self.current_profile()
-        if not profile.is_owner:
-            raise permissions.PermissionDenied("Only company owners can delete products.")
+        if not profile.is_admin:
+            raise permissions.PermissionDenied("Only company admins can delete products.")
         create_audit_log(instance.company, self.request.user, "product_deleted", "product", instance.id, f"Deleted {instance.name}")
         instance.delete()
 
@@ -597,7 +617,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         company = get_company(self.request.user)
         queryset = Notification.objects.filter(company=company)
-        if not get_user_profile(self.request.user).is_owner:
+        if not get_user_profile(self.request.user).is_admin:
             queryset = queryset.filter(user__in=[None, self.request.user])
         return queryset
 

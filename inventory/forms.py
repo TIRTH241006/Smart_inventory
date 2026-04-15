@@ -47,7 +47,7 @@ class OwnerRegistrationForm(forms.Form):
 
 
 class EmailAuthenticationForm(forms.Form):
-    email = forms.EmailField(label="Email", widget=styled_text_input("Email or username", input_type="email", autocomplete="username"))
+    email = forms.CharField(label="Email or Username", widget=styled_text_input("Email or username", autocomplete="username"))
     password = forms.CharField(widget=styled_text_input("Password", input_type="password", autocomplete="current-password"))
 
 
@@ -83,8 +83,13 @@ class EmployeeInviteForm(forms.Form):
     email = forms.EmailField(widget=styled_text_input("employee@company.com", input_type="email", autocomplete="email"))
     job_title = forms.CharField(max_length=120, required=False, widget=styled_text_input("Job title", autocomplete="organization-title"))
     can_manage_inventory = forms.BooleanField(required=False, initial=True, widget=styled_checkbox())
-    can_manage_employees = forms.BooleanField(required=False, widget=styled_checkbox())
     can_view_reports = forms.BooleanField(required=False, initial=True, widget=styled_checkbox())
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if get_user_model().objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("This email is already linked to another account. Each email can only be used once.")
+        return email
 
 
 class CompanySettingsForm(forms.ModelForm):

@@ -8,7 +8,7 @@ def get_profile(user):
 class IsCompanyOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         profile = get_profile(request.user)
-        return bool(request.user and request.user.is_authenticated and profile and profile.is_owner)
+        return bool(request.user and request.user.is_authenticated and profile and profile.is_admin)
 
 
 class CanManageInventory(permissions.BasePermission):
@@ -18,7 +18,7 @@ class CanManageInventory(permissions.BasePermission):
             request.user
             and request.user.is_authenticated
             and profile
-            and (profile.is_owner or profile.can_manage_inventory)
+            and (profile.is_admin or profile.can_manage_inventory)
         )
 
 
@@ -29,5 +29,5 @@ class CanManageEmployees(permissions.BasePermission):
             request.user
             and request.user.is_authenticated
             and profile
-            and (profile.is_owner or profile.can_manage_employees)
+            and (profile.is_admin or profile.can_manage_employees)
         )
