@@ -72,11 +72,33 @@
     el.appendChild(next);
   }
 
+  const chartPalette = [
+    "#22c55e",
+    "#0ea5e9",
+    "#fb7185",
+    "#f59e0b",
+    "#8b5cf6",
+    "#a855f7",
+    "#14b8a6",
+    "#f97316",
+    "#38bdf8",
+    "#facc15",
+  ];
+
   const state = {
     productPage: 1,
     txPage: 1,
-    chart: null,
+    categoryChart: null,
+    statusChart: null,
+    transactionChart: null,
+    supplierChart: null,
   };
+
+  function destroyChart(chart) {
+    if (chart && typeof chart.destroy === "function") {
+      chart.destroy();
+    }
+  }
 
   function currentAccess() {
     const body = document.body.dataset || {};
@@ -494,28 +516,157 @@
     const values = (data.category_distribution || []).map((item) => item.total);
     const chartCtx = document.getElementById("categoryChart");
     if (chartCtx) {
-      if (state.chart) {
-        state.chart.destroy();
-      }
-      state.chart = new Chart(chartCtx, {
+      destroyChart(state.categoryChart);
+      state.categoryChart = new Chart(chartCtx, {
         type: "bar",
         data: {
           labels,
           datasets: [
             {
-              label: "Products",
+              label: "Stock Quantity",
               data: values,
-              backgroundColor: ["#06b6d4", "#0ea5e9", "#f97316", "#84cc16", "#a855f7"],
-              borderRadius: 6,
+              backgroundColor: chartPalette.slice(0, values.length),
+              borderColor: "rgba(255,255,255,0.18)",
+              borderWidth: 1,
+              borderRadius: 8,
+              barThickness: 28,
             },
           ],
         },
         options: {
           responsive: true,
-          plugins: { legend: { labels: { color: "#e2e8f0" } } },
+          aspectRatio: 2.5,
+          animation: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { mode: "index", intersect: false },
+            responsive: {
+              resizeDelay: 100
+            }
+          },
           scales: {
-            x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(100,116,139,0.25)" } },
-            y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(100,116,139,0.25)" } },
+            x: {
+              ticks: { color: "#cbd5e1", maxRotation: 30, minRotation: 30 },
+              grid: { color: "rgba(148,163,184,0.15)" },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#cbd5e1" },
+              grid: { color: "rgba(148,163,184,0.15)" },
+            },
+          },
+        },
+      });
+    }
+
+    const statusLabels = (data.stock_status_distribution || []).map((item) => item.status);
+    const statusValues = (data.stock_status_distribution || []).map((item) => item.total);
+    const statusCtx = document.getElementById("statusChart");
+    if (statusCtx) {
+      destroyChart(state.statusChart);
+      state.statusChart = new Chart(statusCtx, {
+        type: "doughnut",
+        data: {
+          labels: statusLabels,
+          datasets: [
+            {
+              data: statusValues,
+              backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"],
+              borderColor: "rgba(15,23,42,0.95)",
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          aspectRatio: 1,
+          animation: false,
+          cutout: "50%",
+          plugins: {
+            legend: { position: "bottom", labels: { color: "#e2e8f0" } },
+            responsive: {
+              resizeDelay: 100
+            }
+          },
+        },
+      });
+    }
+
+    const transactionLabels = (data.transaction_distribution || []).map((item) =>
+      item.transaction_type === "IN" ? "Stock In" : "Stock Out",
+    );
+    const transactionValues = (data.transaction_distribution || []).map((item) => item.total);
+    const transactionCtx = document.getElementById("transactionChart");
+    if (transactionCtx) {
+      destroyChart(state.transactionChart);
+      state.transactionChart = new Chart(transactionCtx, {
+        type: "pie",
+        data: {
+          labels: transactionLabels,
+          datasets: [
+            {
+              data: transactionValues,
+              backgroundColor: ["#0ea5e9", "#a855f7"],
+              borderColor: "rgba(15,23,42,0.95)",
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          aspectRatio: 1,
+          animation: false,
+          plugins: {
+            legend: { position: "bottom", labels: { color: "#e2e8f0" } },
+            responsive: {
+              resizeDelay: 100
+            }
+          },
+        },
+      });
+    }
+
+    const supplierLabels = (data.supplier_distribution || []).map((item) => item.name);
+    const supplierValues = (data.supplier_distribution || []).map((item) => item.total);
+    const supplierCtx = document.getElementById("supplierChart");
+    if (supplierCtx) {
+      destroyChart(state.supplierChart);
+      state.supplierChart = new Chart(supplierCtx, {
+        type: "bar",
+        data: {
+          labels: supplierLabels,
+          datasets: [
+            {
+              label: "Supplier Product Count",
+              data: supplierValues,
+              backgroundColor: chartPalette.slice(0, supplierValues.length),
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.18)",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          aspectRatio: 2.5,
+          animation: false,
+          indexAxis: "y",
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw} products` } },
+            responsive: {
+              resizeDelay: 100
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#cbd5e1" },
+              grid: { color: "rgba(148,163,184,0.15)" },
+            },
+            y: {
+              ticks: { color: "#cbd5e1" },
+              grid: { display: false },
+            },
           },
         },
       });

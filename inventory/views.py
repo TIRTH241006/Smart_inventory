@@ -1,5 +1,4 @@
 import csv
-import pdfplumber
 
 from django.conf import settings
 from django.contrib import messages
@@ -7,7 +6,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.db import transaction
-from django.db.models import Count, DecimalField, ExpressionWrapper, F, IntegerField, Sum, Value
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, IntegerField, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.utils import OperationalError, ProgrammingError
 from django.http import HttpResponse
@@ -555,6 +554,8 @@ class TransactionViewSet(CompanyScopedViewSet):
         # Handle PDF invoice extraction for STOCK_IN
         if transaction_obj.transaction_type == Transaction.STOCK_IN and transaction_obj.invoice_pdf:
             try:
+                import pdfplumber
+
                 with pdfplumber.open(transaction_obj.invoice_pdf.path) as pdf:
                     text = ""
                     # Extract text from first 2 pages only to avoid too much content
@@ -576,16 +577,22 @@ class TransactionViewSet(CompanyScopedViewSet):
                         else:
                             transaction_obj.note = extracted_info
                         transaction_obj.save(update_fields=['note'])
-            except Exception as e:
-                # Log error but don't fail the transaction
-                print(f"Error extracting PDF: {e}")
-                # Add a note about the PDF upload even if extraction failed
+            except ImportError:
                 pdf_note = f"PDF uploaded: {transaction_obj.invoice_pdf.name}"
                 if transaction_obj.note:
                     transaction_obj.note += f" | {pdf_note}"
                 else:
                     transaction_obj.note = pdf_note
-                transaction_obj.save(update_fields=['note'])
+                transaction_obj.save(update_fields=["note"])
+            except Exception as e:
+                # Log error but don't fail the transaction
+                print(f"Error extracting PDF: {e}")
+                pdf_note = f"PDF uploaded: {transaction_obj.invoice_pdf.name}"
+                if transaction_obj.note:
+                    transaction_obj.note += f" | {pdf_note}"
+                else:
+                    transaction_obj.note = pdf_note
+                transaction_obj.save(update_fields=["note"])
 
         product = Product.objects.select_for_update().get(pk=transaction_obj.product_id)
 
@@ -678,6 +685,21 @@ def dashboard_summary(request):
         ),
     )
 
+    status_counts = {
+        "Healthy": products.filter(quantity__gt=F("reorder_level")).count(),
+        "Low Stock": products.filter(quantity__lte=F("reorder_level"), quantity__gt=0).count(),
+        "Out of Stock": products.filter(quantity=0).count(),
+    }
+    transaction_distribution = list(
+        transactions.values("transaction_type").annotate(total=Count("id")).order_by("transaction_type")
+    )
+    supplier_distribution = list(
+        Supplier.objects.filter(company=company)
+        .annotate(total=Count("products"))
+        .values("name", "total")
+        .order_by("-total")
+    )
+
     return Response(
         {
             "total_products": products.count(),
@@ -691,7 +713,12 @@ def dashboard_summary(request):
             "recent_transactions": TransactionSerializer(recent_transactions, many=True).data,
             "recent_activity": AuditLogSerializer(company.audit_logs.select_related("user")[:8], many=True).data,
             "notifications": NotificationSerializer(company.notifications.filter(is_read=False)[:5], many=True).data,
-            "category_distribution": list(products.values("category").order_by("category").annotate(total=Count("id"))),
+            "category_distribution": list(products.values("category").order_by("category").annotate(total=Sum("quantity"))),
+            "stock_status_distribution": [
+                {"status": status, "total": total} for status, total in status_counts.items()
+            ],
+            "transaction_distribution": transaction_distribution,
+            "supplier_distribution": supplier_distribution,
         }
     )
 

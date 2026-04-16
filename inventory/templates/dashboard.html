@@ -155,7 +155,7 @@
                         <h3 class="font-semibold text-lg">Category Distribution</h3>
                         <span class="section-caption">What your stock mix looks like right now</span>
                     </div>
-                    <canvas id="categoryChart" height="100"></canvas>
+                    <canvas id="categoryChart"></canvas>
                 </div>
 
                 <div class="glass-card p-5">
@@ -164,6 +164,30 @@
                         <span class="text-xs text-red-300">Action Required</span>
                     </div>
                     <ul id="lowStockList" class="space-y-2 text-sm"></ul>
+                </div>
+            </section>
+
+            <section class="grid xl:grid-cols-3 gap-6">
+                <div class="glass-card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Stock Health</h3>
+                        <span class="section-caption">Healthy vs low stock</span>
+                    </div>
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="glass-card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Transaction Mix</h3>
+                        <span class="section-caption">Stock in vs stock out</span>
+                    </div>
+                    <canvas id="transactionChart"></canvas>
+                </div>
+                <div class="glass-card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg">Supplier Coverage</h3>
+                        <span class="section-caption">Inventory by supplier</span>
+                    </div>
+                    <canvas id="supplierChart"></canvas>
                 </div>
             </section>
 
