@@ -89,7 +89,7 @@ def parse_database_url(database_url: str):
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()]
-ALLOWED_HOSTS.extend([".vercel.app", ".now.sh"])
+ALLOWED_HOSTS.extend([".vercel.app", ".now.sh", ".onrender.com"])
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",") if o.strip()]
 
 
